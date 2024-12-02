@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -9,6 +10,7 @@ import Link from "next/link";
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [connect, setConnect] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [balance, setBalance] = useState("");
   const failMessage = "Unable to connect (recheck install Metamask)";
   const susMessage = "เชื่อมต่อสำเร็จ🎉";
@@ -20,6 +22,7 @@ export default function Home() {
         cacheProvider: true, //เปิดไว้ให้จำการใช้ครั้งก่อน
         providerOptions,
       });
+      
       const provider = await web3Modal.connect();
       const ethersProvider = new ethers.BrowserProvider(provider); // Updated for ethers v6
       const accounts = await ethersProvider.listAccounts(); //คืนค่าเป็น array
@@ -27,6 +30,7 @@ export default function Home() {
       setConnect(true);
       const balance = await ethersProvider.getBalance(accounts[0].address);
       setBalance(ethers.formatEther(balance)); // Updated usage of formatEther
+      console.log(currentAccount);
     } catch (error) {
       console.error(failMessage, error);
     }

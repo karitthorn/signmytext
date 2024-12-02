@@ -22,7 +22,7 @@ export default function RootLayout({
           sizes="<generated>"
         />
       </head>
-      <body className={prompt.className}>{children}</body>
+      <body className={prompt.className}><div className="">{children}</div></body>
     </html>
   );
 }

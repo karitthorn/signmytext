@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="h-screen w-screen bg-gradient-to-r from-cyan-200 to-blue-300 ">
+      <div className="h-screen w-screen bg-gradient-to-r from-cyan-100 to-blue-200 ">
         {/* Navbar Start */}
 
         <nav className=" border-gray-200">
@@ -102,7 +102,7 @@ export default function Home() {
               </div>
 
         {/* footer */}
-         <div className="sticky bottom-10 md:pl-36 md:pr-36 mt-96 ">
+        <div className="fixed bottom-0 md:pl-36 md:pr-36 w-full">
           <Footer />
         </div>
  

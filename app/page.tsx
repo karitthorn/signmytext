@@ -5,13 +5,13 @@ import Web3Modal from "web3modal";
 import { ethers } from "ethers";
 import Footer from "./components/footer";
 import Link from "next/link";
-import {  verifyMessage } from "ethers"; // Ensure Wallet and verifyMessage are imported
+import { verifyMessage } from "ethers"; // Ensure Wallet and verifyMessage are imported
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [connect, setConnect] = useState(false);
   const [balance, setBalance] = useState("");
-  const [message,setMessage] = useState("")
+  const [message, setMessage] = useState("");
   const failMessage = "Unable to connect (recheck install Metamask)";
   const susMessage = "เชื่อมต่อสำเร็จ🎉";
 
@@ -34,48 +34,45 @@ export default function Home() {
       alert("เชื่อมต่อไม่สำเร็จ ❌");
     }
   };
-  
 
   const signmytext = async () => {
     // Ensure the wallet is connected
     if (!currentAccount) {
-      alert("Please connect your wallet first.");
+      alert("กรุณาเชื่อมต่อ wallet");
       return;
     }
-  
+
     try {
       // Ensure Ethereum provider exists
       if (!window.ethereum) {
         alert("MetaMask is not installed!");
         return;
       }
-  
+
       // Create an ethers provider from MetaMask's injected provider
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-  
-  
+
       const signature = await signer.signMessage(message);
       const address = await signer.getAddress();
-  
- 
+
       const recoveredAddress = verifyMessage(message, signature);
       const isValid = recoveredAddress === address;
-  
+
       console.log(`Message is valid: ${isValid}`);
-      alert(`Signed successfully! Signature: ${signature}`);
+      alert(`✨Signed สำเร็จ! Signature: ${signature}`);
     } catch (error) {
       console.log("Error signing message:", error);
-      alert("ทำรายการไม่สำเร็จ" );
+      alert("ทำรายการไม่สำเร็จ");
     }
   };
 
   return (
     <>
-      <div className="h-screen w-screen bg-gradient-to-r from-cyan-100 to-blue-200 ">
-        {/* Navbar Start */}
+      <div className="min-h-screen flex flex-col bg-gradient-to-r from-cyan-100 to-blue-200">
+      {/* Navbar Start */}
 
-        <nav className=" border-gray-200">
+      <nav className=" border-gray-200">
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <Link
               href="/"
@@ -123,87 +120,85 @@ export default function Home() {
         </nav>
 
         {/* Navbar end */}
-        {/* header start */}
-        <div className="flex justify-center flex-col items-center w-full">
-          <h1 className="mt-20 mb-4 text-3xl font-extrabold text-gray-900 md:text-5xl lg:text-6xl">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
-              Sign
-            </span>{" "}
-            Mytext
-          </h1>
+
+        <div className="flex-grow flex flex-col items-center">
+          {/* header */}
           <div className="flex justify-center flex-col items-center w-full">
+            <h1 className="mt-20 mb-4 text-3xl font-extrabold text-gray-900 md:text-5xl lg:text-6xl">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
+                Sign
+              </span>{" "}
+              Mytext
+            </h1>
             <p className="text-lg font-normal text-gray-500 lg:text-xl">
               ลอง Sign บางอย่างสิ!!!
             </p>
           </div>
-        </div>
 
-        {/* header end */}
-        {/* 2 card Balance start */}
-        <div className="flex justify-center md:flex-row flex-col w-full items-center mt-10">
-          {connect ? (
-            <>
-              <div className="md:mr-10 block max-w-lm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 m-10 md:m-0">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
-                  Address
-                </h5>
-                <p className="text-sm text-gray-700">{currentAccount} </p>
-              </div>
+          {/* Content */}
+          <div className="flex justify-center md:flex-row flex-col w-full items-center mt-10">
+            {connect ? (
+              <>
+                <div className="md:mr-10 block max-w-lm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 m-10 md:m-0">
+                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+                    Address
+                  </h5>
+                  <p className="text-sm text-gray-700">{currentAccount} </p>
+                </div>
+                <div className="mt-10 md:mt-0 w-64 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
+                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+                    ยอดเงินคงเหลือ
+                  </h5>
+                  <p className="font-bold text-gray-700">{balance} ETH</p>
+                </div>
+              </>
+            ) : (
+              <p className="text-red-500">กรุณาเชื่อมต่อ MetaMask ❌</p>
+            )}
+          </div>
 
-              <div className="mt-10 md:mt-0 w-64 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
-                  ยอดเงินคงเหลือ
-                </h5>
-                <p className="font-bold text-gray-700">{balance} ETH</p>
-              </div>
-            </>
-          ) : (
-            <p className="text-red-500">กรุณาเชื่อมต่อ MetaMask ❌</p>
-          )}
-        </div>
-        {/* 2 card Balance end */}
-        {/* sign card start*/}
-        <div className="flex w-full justify-center mt-10">
-          <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8">
-            <form className="space-y-6" action="#">
-              <h5 className="text-xl font-medium text-gray-900">Sign text</h5>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-gray-900"
+          <div className="flex w-full justify-center mt-10 ">
+            <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8">
+              <form className="space-y-6" action="#">
+                <h5 className="text-xl font-medium text-gray-900">Sign text</h5>
+                <div>
+                  <label
+                    htmlFor="text"
+                    className="block mb-2 text-sm font-medium text-gray-900"
+                  >
+                    ข้อความของคุณ
+                  </label>
+                  <input
+                    id="text"
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    placeholder="Hello world"
+                    required
+                  />
+                </div>
+                <button
+                  onClick={signmytext}
+                  type="button"
+                  className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 >
-                  ข้อความของคุณ
-                </label>
-                <input
-                  id="text"
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                  placeholder="Hello world"
-                  required
-                />
-              </div>
-
-              <button
-              onClick={signmytext}
-                type="button"
-                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                SignNow
-              </button>
-              <div className="text-sm font-medium text-gray-500">
-                เป็นเพียง Project เพื่อการศึกษาเท่านั้น ไม่รับผิดชอบทุกกรณี{" "}
-                <a href="/about" className="text-blue-700 hover:underline">
-                  อ่านเพิ่มเติม
-                </a>
-              </div>
-            </form>
+                  SignNow
+                </button>
+                <div className="text-sm font-medium text-gray-500">
+                  เป็นเพียง Project เพื่อการศึกษาเท่านั้น ไม่รับผิดชอบทุกกรณี{" "}
+                  <a href="/about" className="text-blue-700 hover:underline">
+                    อ่านเพิ่มเติม
+                  </a>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-        <div className="sticky bottom-0 md:pl-36 md:pr-36 mt-40">
+
+        {/* Footer */}
+        <div className=" md:pl-24 md:pr-24">
           <Footer />
         </div>
       </div>
-      {/* sign card end */}
     </>
   );
 }

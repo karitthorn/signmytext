@@ -1,101 +1,209 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import Web3Modal from "web3modal";
+import { ethers } from "ethers";
+import Footer from "./components/footer";
+import Link from "next/link";
+import {  verifyMessage } from "ethers"; // Ensure Wallet and verifyMessage are imported
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [currentAccount, setCurrentAccount] = useState("");
+  const [connect, setConnect] = useState(false);
+  const [balance, setBalance] = useState("");
+  const [message,setMessage] = useState("")
+  const failMessage = "Unable to connect (recheck install Metamask)";
+  const susMessage = "เชื่อมต่อสำเร็จ🎉";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const connectWallet = async () => {
+    try {
+      const providerOptions = {};
+      const web3Modal = new Web3Modal({
+        cacheProvider: true, //เปิดไว้ให้จำการใช้ครั้งก่อน
+        providerOptions,
+      });
+      const provider = await web3Modal.connect();
+      const ethersProvider = new ethers.BrowserProvider(provider); // Updated for ethers v6
+      const accounts = await ethersProvider.listAccounts(); //คืนค่าเป็น array
+      setCurrentAccount(accounts[0].address); // maybe eth
+      setConnect(true);
+      const balance = await ethersProvider.getBalance(accounts[0].address);
+      setBalance(ethers.formatEther(balance)); // Updated usage of formatEther
+    } catch (error) {
+      console.error(failMessage, error);
+      alert("เชื่อมต่อไม่สำเร็จ ❌");
+    }
+  };
+  
+
+  const signmytext = async () => {
+    // Ensure the wallet is connected
+    if (!currentAccount) {
+      alert("Please connect your wallet first.");
+      return;
+    }
+  
+    try {
+      // Ensure Ethereum provider exists
+      if (!window.ethereum) {
+        alert("MetaMask is not installed!");
+        return;
+      }
+  
+      // Create an ethers provider from MetaMask's injected provider
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+  
+  
+      const signature = await signer.signMessage(message);
+      const address = await signer.getAddress();
+  
+ 
+      const recoveredAddress = verifyMessage(message, signature);
+      const isValid = recoveredAddress === address;
+  
+      console.log(`Message is valid: ${isValid}`);
+      alert(`Signed successfully! Signature: ${signature}`);
+    } catch (error) {
+      console.log("Error signing message:", error);
+      alert("ทำรายการไม่สำเร็จ" );
+    }
+  };
+
+  return (
+    <>
+      <div className="h-screen w-screen bg-gradient-to-r from-cyan-100 to-blue-200 ">
+        {/* Navbar Start */}
+
+        <nav className=" border-gray-200">
+          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <Link
+              href="/"
+              className="flex items-center space-x-3 rtl:space-x-reverse"
+            >
+              {/* <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" /> */}
+              <span className="self-center text-2xl font-semibold whitespace-nowrap">
+                SignMytext
+              </span>
+            </Link>
+            <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+              <button
+                onClick={connectWallet}
+                type="button"
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
+              >
+                {connect ? susMessage : "Connect MetaMask"}
+              </button>
+            </div>
+            <div
+              className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
+              id="navbar-cta"
+            >
+              <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg  md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 ">
+                <li>
+                  <Link
+                    href="/"
+                    className="block py-2 px-3 md:p-0 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700"
+                    aria-current="page"
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="/about"
+                    className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700"
+                  >
+                    About
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+
+        {/* Navbar end */}
+        {/* header start */}
+        <div className="flex justify-center flex-col items-center w-full">
+          <h1 className="mt-20 mb-4 text-3xl font-extrabold text-gray-900 md:text-5xl lg:text-6xl">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
+              Sign
+            </span>{" "}
+            Mytext
+          </h1>
+          <div className="flex justify-center flex-col items-center w-full">
+            <p className="text-lg font-normal text-gray-500 lg:text-xl">
+              ลอง Sign บางอย่างสิ!!!
+            </p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* header end */}
+        {/* 2 card Balance start */}
+        <div className="flex justify-center md:flex-row flex-col w-full items-center mt-10">
+          {connect ? (
+            <>
+              <div className="md:mr-10 block max-w-lm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 m-10 md:m-0">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+                  Address
+                </h5>
+                <p className="text-sm text-gray-700">{currentAccount} </p>
+              </div>
+
+              <div className="mt-10 md:mt-0 w-64 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+                  ยอดเงินคงเหลือ
+                </h5>
+                <p className="font-bold text-gray-700">{balance} ETH</p>
+              </div>
+            </>
+          ) : (
+            <p className="text-red-500">กรุณาเชื่อมต่อ MetaMask ❌</p>
+          )}
+        </div>
+        {/* 2 card Balance end */}
+        {/* sign card start*/}
+        <div className="flex w-full justify-center mt-10">
+          <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8">
+            <form className="space-y-6" action="#">
+              <h5 className="text-xl font-medium text-gray-900">Sign text</h5>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block mb-2 text-sm font-medium text-gray-900"
+                >
+                  ข้อความของคุณ
+                </label>
+                <input
+                  id="text"
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  placeholder="Hello world"
+                  required
+                />
+              </div>
+
+              <button
+              onClick={signmytext}
+                type="button"
+                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              >
+                SignNow
+              </button>
+              <div className="text-sm font-medium text-gray-500">
+                เป็นเพียง Project เพื่อการศึกษาเท่านั้น ไม่รับผิดชอบทุกกรณี{" "}
+                <a href="/about" className="text-blue-700 hover:underline">
+                  อ่านเพิ่มเติม
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div className="sticky bottom-0 md:pl-36 md:pr-36 mt-40">
+          <Footer />
+        </div>
+      </div>
+      {/* sign card end */}
+    </>
   );
 }

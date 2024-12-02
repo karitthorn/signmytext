@@ -157,8 +157,8 @@ export default function Home() {
             )}
           </div>
 
-          <div className="flex w-full justify-center mt-10 ">
-            <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8">
+          <div className="flex w-full justify-center mt-10  ">
+            <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 m-5">
               <form className="space-y-6" action="#">
                 <h5 className="text-xl font-medium text-gray-900">Sign text</h5>
                 <div>
